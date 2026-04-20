@@ -59,3 +59,29 @@ Setelah menjalankan cargo run dan mengakses 127.0.0.1:7878, browser berhasil mer
 
 Berikut adalah tampilan halaman web dari mesin saya:
 ![Commit 2 screen capture](/assets/images/commit2.png)
+
+
+# Commit 3 Reflection
+
+## Mengenal Perbedaan Response
+
+Pada milestone ini, saya mengimplementasikan logika percabangan untuk menangani berbagai request path.
+
+Jika request berisi GET / HTTP/1.1, server merespon dengan status 200 OK dan menampilkan hello.html.
+
+Jika request berisi jalur lain (misalnya /random), server merespon dengan status 404 NOT FOUND dan menampilkan 404.html.
+
+## Mengapa Refactoring Diperlukan?
+
+Sebelum direfaktorisasi, kita mungkin tergoda untuk menulis blok if/else yang di dalamnya penuh dengan kode pembacaan file dan pengiriman stream yang berulang.
+Refaktorisasi pada kode di atas sangat penting karena:
+
+Readability: Kode menjadi jauh lebih bersih. Logika penentuan "apa yang dikirim" dipisahkan dari logika "bagaimana cara mengirimnya".
+
+Maintainability: Jika nanti saya ingin mengubah format header HTTP, saya hanya perlu mengubah satu tempat (di fungsi format!), bukan di setiap blok if.
+
+Efficiency: Mengurangi risiko kesalahan ketik (typo) pada bagian pengiriman data karena kodenya hanya ditulis satu kali.
+
+## Analisis Hasil
+
+Setelah dijalankan, saat saya mengakses 127.0.0.1:7878/bad, browser sekarang dengan benar menampilkan halaman "Oops!" dengan status code 404. Ini menunjukkan server sudah memiliki kemampuan dasar untuk memvalidasi input dari user.
