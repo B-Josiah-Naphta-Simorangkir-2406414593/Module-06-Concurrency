@@ -85,3 +85,28 @@ Efficiency: Mengurangi risiko kesalahan ketik (typo) pada bagian pengiriman data
 ## Analisis Hasil
 
 Setelah dijalankan, saat saya mengakses 127.0.0.1:7878/bad, browser sekarang dengan benar menampilkan halaman "Oops!" dengan status code 404. Ini menunjukkan server sudah memiliki kemampuan dasar untuk memvalidasi input dari user.
+
+
+# Commit 4 Reflection
+
+## Analisis Simulasi Slow Response
+
+Pada milestone ini, saya mensimulasikan beban kerja yang berat dengan menambahkan fungsi thread::sleep(Duration::from_secs(10)) pada endpoint /sleep.
+
+Saat saya mencoba mengakses /sleep di satu tab browser dan kemudian mencoba mengakses / (halaman utama) di tab lain secara bersamaan, saya menemukan bahwa halaman utama tidak langsung muncul. Halaman utama tersebut terpaksa menunggu sampai proses /sleep selesai selama 10 detik.
+
+## Mengapa Hal Ini Terjadi?
+
+Hal ini terjadi karena server kita saat ini bersifat Single-Threaded. Artinya, server hanya bisa mengerjakan satu tugas dalam satu waktu.
+
+1. Server menerima koneksi dari Tab 1 (/sleep).
+
+2. Server masuk ke mode "tidur" selama 10 detik.
+
+3. Selama 10 detik itu, server berhenti total dan tidak bisa membaca koneksi baru dari Tab 2.
+
+4. Tab 2 mengantre di sistem operasi sampai thread utama server selesai mengerjakan tugas dari Tab 1.
+
+## Kesimpulan
+
+Model single-threaded sangat tidak efisien untuk server web yang melayani banyak pengguna. Jika satu pengguna melakukan permintaan yang memakan waktu lama, seluruh pengguna lainnya akan mengalami delay (terblokir). Solusi untuk masalah ini adalah dengan mengimplementasikan ThreadPool agar server bisa menangani banyak permintaan secara paralel (Multithreading), yang akan dikerjakan pada milestone berikutnya.
