@@ -21,3 +21,41 @@ Saat saya menjalankan server dan mengaksesnya melalui browser, terminal seringka
 1. Browser Modern: Browser seringkali membuka beberapa koneksi TCP sekaligus untuk mempercepat loading (misalnya satu untuk konten utama, satu lagi untuk mencari favicon.ico).
 
 2. Retry Logic: Jika server tidak segera merespon (karena di Milestone 1 kita belum mengirim response balik), browser mungkin mencoba mengirim ulang request untuk memastikan koneksi tidak terputus.
+
+
+# Commit 2 Reflection
+
+## Penjelasan Kode handle_connection
+
+Pada milestone ini, fungsi handle_connection telah ditingkatkan untuk tidak hanya membaca request, tetapi juga memberikan respon balik berupa konten HTML. Berikut adalah alur kerjanya:
+
+1. Pemisahan Request: Meskipun kita membaca request dari buf_reader, pada tahap ini kita fokus pada pengiriman response.
+
+2. Pembacaan File: Menggunakan fs::read_to_string("hello.html"), server membaca file fisik di disk menjadi String. Ini memberikan fleksibilitas untuk mengubah tampilan web tanpa harus mengubah kode Rust (selama nama filenya tetap).
+
+3. Struktur Response HTTP: Kita menyusun string respon dengan format:
+
+    a.Status Line: HTTP/1.1 200 OK yang memberitahu browser bahwa permintaan berhasil diproses.
+
+    b. Header: Content-Length sangat krusial di sini. Ini memberitahu browser berapa banyak bytes data yang harus mereka baca dari stream. Tanpa ini, browser mungkin tidak tahu kapan sebuah file selesai di-download.
+
+    c. Body: Isi dari file hello.html yang telah dibaca sebelumnya.
+
+4. Penulisan Stream: stream.write_all(response.as_bytes()).unwrap() mengirimkan string yang sudah diubah menjadi byte array kembali melalui koneksi TCP.
+
+## Mengapa Kita Membutuhkan Content-Length?
+
+Dalam protokol HTTP, Content-Length adalah salah satu header yang memberi tahu penerima ukuran body pesan dalam satuan octets (bytes).
+
+Jika kita tidak menyertakan header ini atau ukurannya salah:
+
+1. Browser mungkin akan terus menunggu data tambahan (loading tidak selesai).
+
+2. Koneksi mungkin ditutup secara prematur, mengakibatkan halaman web tampil tidak utuh atau rusak.
+
+## Analisis Hasil
+
+Setelah menjalankan cargo run dan mengakses 127.0.0.1:7878, browser berhasil merender elemen h1 dan p yang ada di dalam hello.html. Hal ini membuktikan bahwa server Rust kita telah berfungsi sebagai server web statis sederhana yang mampu menangani handshake TCP dan merespon dengan protokol HTTP yang valid.
+
+Berikut adalah tampilan halaman web dari mesin saya:
+![Commit 2 screen capture](/assets/images/commit2.png)
