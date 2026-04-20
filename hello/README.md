@@ -110,3 +110,20 @@ Hal ini terjadi karena server kita saat ini bersifat Single-Threaded. Artinya, s
 ## Kesimpulan
 
 Model single-threaded sangat tidak efisien untuk server web yang melayani banyak pengguna. Jika satu pengguna melakukan permintaan yang memakan waktu lama, seluruh pengguna lainnya akan mengalami delay (terblokir). Solusi untuk masalah ini adalah dengan mengimplementasikan ThreadPool agar server bisa menangani banyak permintaan secara paralel (Multithreading), yang akan dikerjakan pada milestone berikutnya.
+
+
+# Commit 5 Reflection
+
+## Bagaimana ThreadPool Bekerja?
+
+ThreadPool yang saya buat berfungsi sebagai sekumpulan thread yang sudah di-spawn sebelumnya dan siap untuk mengerjakan tugas. Alur kerjanya adalah:
+
+1. Channel: Saya menggunakan mpsc (multi-producer, single-consumer) sebagai media komunikasi. ThreadPool memegang sender, dan setiap Worker memegang bagian dari receiver.
+
+2. Mutex & Arc: Karena receiver harus diakses oleh banyak Worker secara bergantian, saya membungkusnya dengan Arc<Mutex<...>>. Arc memungkinkan kepemilikan bersama secara aman antar thread, dan Mutex menjamin hanya satu worker yang bisa mengambil tugas dari antrean dalam satu waktu.
+
+3. Worker: Setiap worker memiliki loop yang terus berjalan, menunggu pesan masuk dari channel, mengeksekusinya, lalu kembali menunggu tugas baru.
+
+## Perbaikan dari Milestone Sebelumnya
+
+Dengan implementasi ini, masalah blocking pada Milestone 4 berhasil diatasi. Server kini mampu menangani permintaan secara paralel hingga jumlah maksimum worker yang ditentukan (dalam kasus ini, 4). Jika semua worker sedang sibuk, permintaan baru barulah akan mengantre, namun tidak akan mematikan respon server secara keseluruhan.
