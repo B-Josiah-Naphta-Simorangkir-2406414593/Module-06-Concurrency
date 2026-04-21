@@ -127,3 +127,21 @@ ThreadPool yang saya buat berfungsi sebagai sekumpulan thread yang sudah di-spaw
 ## Perbaikan dari Milestone Sebelumnya
 
 Dengan implementasi ini, masalah blocking pada Milestone 4 berhasil diatasi. Server kini mampu menangani permintaan secara paralel hingga jumlah maksimum worker yang ditentukan (dalam kasus ini, 4). Jika semua worker sedang sibuk, permintaan baru barulah akan mengantre, namun tidak akan mematikan respon server secara keseluruhan.
+
+
+# Bonus: Function Improvement (build vs new)
+
+## Perbandingan new dan build
+
+Pada bagian bonus ini, saya mengimplementasikan fungsi build sebagai alternatif dari new.
+
+1. Fungsi new: Secara konvensi di Rust, fungsi new biasanya digunakan untuk inisialisasi yang sederhana dan jarang gagal. Di kode awal, kita menggunakan assert!(size > 0) yang akan memicu panic! jika kondisi tidak terpenuhi. Hal ini kurang ideal untuk aplikasi yang membutuhkan robustness tinggi.
+
+2. Fungsi build: Dengan build, saya mengembalikan tipe Result<ThreadPool, PoolCreationError>. Ini mengikuti filosofi Rust tentang explicit error handling. Jika user memasukkan angka 0, program tidak akan langsung crash, melainkan mengembalikan Err yang bisa ditangani dengan baik oleh pemanggil fungsi.
+
+## Keuntungan Implementasi
+
+1. Safety: Menghindari penghentian program secara tiba-tiba (runtime panic).
+
+2. Flexibility: Pemanggil fungsi (di main.rs) bisa memutuskan apa yang harus dilakukan jika pembuatan pool gagal, misalnya dengan melakukan logging atau menggunakan nilai fallback.
+
